@@ -90,6 +90,9 @@ public:
         sc.m_ss << val;
         return sc;
     }
+
+    template <class Type>
+    friend ConsoleLog::StreamControl&& operator<<(ConsoleLog::StreamControl&& sc, const Type& val);
 };
 
 template <class Type>
