@@ -63,6 +63,6 @@ void f1() {
 
 int main() {
     auto logger = getLogger("test");
-    logger.getMessage();
+    logger(INFO);
     return 0;
 }

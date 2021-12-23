@@ -5,6 +5,7 @@
 #include <string>
 #include <thread>
 #include <map>
+#include <mutex>
 
 /*
 Example of console output:
@@ -33,21 +34,36 @@ void f1() {
 }
 */
 
+enum LogLevel {
+    INFO,
+    DEBUG,
+    WARNING,
+    ERROR
+};
+
+#define getLogger(message) ConsoleLog::getInstance(message)
+
 class ConsoleLog {
 private:
     std::string m_message;
-    std::map<std::thread::id, std::string> m_mapThreads;
-    static std::mutex g_mutex;
+    static std::mutex m_mutex;
+    static std::map<std::thread::id, std::string> m_mapThreads;
 private:
     ConsoleLog() {}
     void setMessage(std::string message, std::thread::id thread_id);
+    std::string levelToString(LogLevel level);
 public:
-    void getMessage() { std::cout << m_message << std::endl;}
     ConsoleLog& operator=(ConsoleLog&) = delete;
-    ConsoleLog(const ConsoleLog&) {std::cout << "Copy" << std::endl;};
-    static ConsoleLog& getInstance(std::string message, std::thread::id thread_id);
-};
 
-ConsoleLog& getLogger(std::string message = "");
+    void getMessage(std::thread::id thread_id);
+    static ConsoleLog& getInstance(std::string message);
+
+    ConsoleLog& operator()(LogLevel level = INFO);
+
+    template <class Type>
+    ConsoleLog& operator<<(const ConsoleLog& log, const Type& val) {
+
+    }
+};
 
 #endif /* _LOG__H_ */
