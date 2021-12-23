@@ -4,8 +4,8 @@
 #include <iostream>
 #include <string>
 #include <thread>
-#include <map>
 #include <mutex>
+#include <sstream>
 
 /*
 Example of console output:
@@ -41,29 +41,65 @@ enum LogLevel {
     ERROR
 };
 
-#define getLogger(message) ConsoleLog::getInstance(message)
+std::string levelToString(LogLevel level);
 
 class ConsoleLog {
-private:
-    std::string m_message;
+
+    using ThreadId = std::thread::id;
+
+private: /* Structs */
+    struct StreamControl {
+        std::stringstream& m_ss;
+
+        explicit StreamControl(std::stringstream& ss, LogLevel level, const std::string& message, ThreadId id) : m_ss(ss) {
+            std::string level_str = levelToString(level);
+
+            m_ss << __DATE__ << " " << __TIME__ << ";" << " " << level_str << "; ";
+
+            if (!message.empty()) {
+                m_ss << message;
+            }
+
+            m_ss << "(" << id << "): ";
+        }
+
+        StreamControl(StreamControl&& sc) : m_ss(sc.m_ss) {
+            std::cout << "Move Const" << std::endl;
+        }
+
+        ~StreamControl() {
+            std::lock_guard<std::mutex> lock(ConsoleLog::m_mutex);
+            std::cout << m_ss.str() << std::endl;
+            m_ss.str("");
+        }
+    };
+
+private: /* Variables */
     static std::mutex m_mutex;
-    static std::map<std::thread::id, std::string> m_mapThreads;
-private:
-    ConsoleLog() {}
-    void setMessage(std::string message, std::thread::id thread_id);
-    std::string levelToString(LogLevel level);
+    std::stringstream m_ss;
+    std::string m_message;
+    ThreadId m_id;
+
+private: /* Functions */
 public:
-    ConsoleLog& operator=(ConsoleLog&) = delete;
+    explicit ConsoleLog(std::string message, ThreadId id);
 
-    void getMessage(std::thread::id thread_id);
-    static ConsoleLog& getInstance(std::string message);
-
-    ConsoleLog& operator()(LogLevel level = INFO);
+    ConsoleLog::StreamControl operator()(LogLevel level = INFO);
 
     template <class Type>
-    ConsoleLog& operator<<(const ConsoleLog& log, const Type& val) {
-
+    ConsoleLog::StreamControl operator<<(const Type& val) {
+        ConsoleLog::StreamControl sc(this->m_ss, INFO, this->m_message, this->m_id);
+        sc.m_ss << val;
+        return sc;
     }
 };
+
+template <class Type>
+ConsoleLog::StreamControl&& operator<<(ConsoleLog::StreamControl&& sc, const Type& val) {
+    sc.m_ss << val;
+    return std::move(sc);
+}
+
+ConsoleLog getLogger(const std::string& str = "");
 
 #endif /* _LOG__H_ */
