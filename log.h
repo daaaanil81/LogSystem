@@ -63,10 +63,6 @@ private: /* Structs */
             m_ss << "(" << id << "): ";
         }
 
-        StreamControl(StreamControl&& sc) : m_ss(sc.m_ss) {
-            std::cout << "Move Const" << std::endl;
-        }
-
         ~StreamControl() {
             std::lock_guard<std::mutex> lock(ConsoleLog::m_mutex);
             std::cout << m_ss.str() << std::endl;
