@@ -64,7 +64,12 @@ private: /* Structs */
         }
 
         ~StreamControl() {
-            //std::lock_guard<std::mutex> lock(ConsoleLog::m_mutex);
+            /* Concurrent access to a synchronized (29.5.3.4)
+             * standard iostream object’s formatted and unformatted input (29.7.4.1) and output (29.7.5.1)
+             * functions or a standard C stream by multiple threads does not result in a data race (6.9.2).
+             * [Note: Users must still synchronize concurrent use of these objects and streams by multiple
+             * threads if they wish to avoid interleaved characters. —end note] */
+            // https://isocpp.org/files/papers/N4860.pdf Page: 1358(29.4.2)
             m_ss << std::endl;
             std::cout << m_ss.str();
             m_ss.str("");
@@ -72,7 +77,6 @@ private: /* Structs */
     };
 
 private: /* Variables */
-    //static std::mutex m_mutex;
     std::stringstream m_ss;
     std::string m_message;
     ThreadId m_id;
