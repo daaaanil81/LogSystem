@@ -51,7 +51,7 @@ private: /* Structs */
     struct StreamControl {
         std::stringstream& m_ss;
 
-        explicit StreamControl(std::stringstream& ss, LogLevel level, const std::string& message, ThreadId id) : m_ss(ss) {
+        StreamControl(std::stringstream& ss, LogLevel level, const std::string& message, ThreadId id) : m_ss(ss) {
             std::string level_str = levelToString(level);
 
             m_ss << __DATE__ << " " << __TIME__ << ";" << " " << level_str << "; ";
@@ -78,7 +78,8 @@ private: /* Variables */
 
 private: /* Functions */
 public:
-    explicit ConsoleLog(std::string message, ThreadId id);
+    ConsoleLog() = delete;
+    ConsoleLog(std::string message, ThreadId id);
 
     ConsoleLog::StreamControl operator()(LogLevel level = INFO);
 
