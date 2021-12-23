@@ -64,14 +64,15 @@ private: /* Structs */
         }
 
         ~StreamControl() {
-            std::lock_guard<std::mutex> lock(ConsoleLog::m_mutex);
-            std::cout << m_ss.str() << std::endl;
+            //std::lock_guard<std::mutex> lock(ConsoleLog::m_mutex);
+            m_ss << std::endl;
+            std::cout << m_ss.str();
             m_ss.str("");
         }
     };
 
 private: /* Variables */
-    static std::mutex m_mutex;
+    //static std::mutex m_mutex;
     std::stringstream m_ss;
     std::string m_message;
     ThreadId m_id;

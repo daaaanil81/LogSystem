@@ -5,7 +5,7 @@ ConsoleLog::ConsoleLog(std::string message, ThreadId id) {
     m_id = id;
 }
 
-std::mutex ConsoleLog::m_mutex;
+//std::mutex ConsoleLog::m_mutex;
 
 std::string levelToString(LogLevel l) {
     switch (l) {
