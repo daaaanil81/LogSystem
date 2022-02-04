@@ -84,9 +84,14 @@ private: /* Variables */
 private: /* Functions */
 public:
     ConsoleLog() = delete;
-    ConsoleLog(std::string message, ThreadId id);
+	ConsoleLog(const std::string& message, ThreadId id) {
+		m_message = message;
+		m_id = id;
+	}
 
-    ConsoleLog::StreamControl operator()(LogLevel level = INFO);
+	ConsoleLog::StreamControl operator()(LogLevel level = INFO) {
+		return ConsoleLog::StreamControl(this->m_ss, level, this->m_message, this->m_id);
+	}
 
     template <class Type>
     ConsoleLog::StreamControl operator<<(const Type& val) {
@@ -105,6 +110,26 @@ ConsoleLog::StreamControl&& operator<<(ConsoleLog::StreamControl&& sc, const Typ
     return std::move(sc);
 }
 
-ConsoleLog getLogger(const std::string& str = "");
+ConsoleLog getLogger(const std::string& str = "") {
+    std::thread::id thread_id = std::this_thread::get_id();
+
+    return ConsoleLog(str, thread_id);
+}
+
+std::string levelToString(LogLevel l) {
+    switch (l) {
+    case INFO:
+        return "INFO";
+    case DEBUG:
+        return "DEBUG";
+    case WARNING:
+        return "WARNING";
+    case ERROR:
+        return "ERROR";
+    default:
+        return "";
+    }
+}
+
 
 #endif /* _LOG__H_ */
